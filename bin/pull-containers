@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import os
 import subprocess
+import time
 from pathlib import Path
 
 import yaml
@@ -13,6 +14,7 @@ import yaml
 parser = argparse.ArgumentParser()
 parser.add_argument("cache", nargs="?", default=os.path.join(os.environ.get("SCRATCH", "containers"), "atacseq-container-cache") if os.environ.get("SCRATCH") else "containers/cache")
 parser.add_argument("--manifest", default="containers/images.yaml")
+parser.add_argument("--retries", type=int, default=3)
 args = parser.parse_args()
 
 cache = Path(args.cache).resolve()
@@ -28,7 +30,15 @@ for name, spec in images.items():
     cache_name = hashlib.md5(spec["uri"].encode(), usedforsecurity=False).hexdigest() + ".simg"
     sif = cache / cache_name
     if not sif.exists():
-        subprocess.run(["singularity", "pull", "--name", str(sif), spec["uri"]], check=True, env=pull_env)
+        for attempt in range(1, args.retries + 1):
+            print(f"Pulling {name} ({attempt}/{args.retries})", flush=True)
+            try:
+                subprocess.run(["singularity", "pull", "--name", str(sif), spec["uri"]], check=True, env=pull_env)
+                break
+            except subprocess.CalledProcessError:
+                if attempt == args.retries:
+                    raise
+                time.sleep(15 * attempt)
     digest = hashlib.sha256(sif.read_bytes()).hexdigest()
     rows.append(f"{name}\t{spec['version']}\t{spec['uri']}\t{sif}\t{digest}")
 Path("containers/locked.tsv").write_text("\n".join(rows) + "\n")

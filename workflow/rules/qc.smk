@@ -65,7 +65,7 @@ rule ataqv:
         peaks=f"{OUT}/peaks/sample/{{sample}}.peaks.narrowPeak",
         tss=REF["tss_bed"],
         blacklist=REF["blacklist_bed"],
-        autosomes=REF["nuclear_contigs"],
+        autosomes=REF.get("autosomes_file", REF["nuclear_contigs"]),
     output:
         json=f"{OUT}/qc/ataqv/{{sample}}.json",
         text=f"{OUT}/qc/ataqv/{{sample}}.txt",

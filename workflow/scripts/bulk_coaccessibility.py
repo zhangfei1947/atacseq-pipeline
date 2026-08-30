@@ -5,7 +5,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from scipy.stats import spearmanr
 
 
 counts = pd.read_csv(snakemake.input.counts, sep="\t")
@@ -24,6 +23,16 @@ if not enabled or len(manifest) < minimum:
     status["reason"] = "module_disabled" if not enabled else "fewer_than_20_independent_samples"
     Path(snakemake.output.status).write_text(json.dumps(status, indent=2) + "\n")
 else:
+    # scipy is only needed for the optional correlation calculation. Keep the
+    # disabled/ineligible status path runnable in lean workflow environments.
+    try:
+        from scipy.stats import spearmanr
+    except ImportError as exc:
+        raise RuntimeError(
+            "bulk_coaccessibility is enabled but scipy is unavailable; "
+            "install the dependencies declared in environment.yaml"
+        ) from exc
+
     sample_ids = manifest.sample_id.tolist()
     matrix = counts.set_index("peak_id")[sample_ids].astype(float)
     lib = matrix.sum(axis=0)

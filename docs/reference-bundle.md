@@ -18,6 +18,7 @@ Required for a complete run:
 
 Optional:
 
+- `autosomes_file`: one-contig-per-line autosome list for ataqv; falls back to `nuclear_contigs`.
 - `redfly_bed`: versioned REDfly regulatory elements in the same coordinate build.
 - `autosomes`: comma-separated contigs for ataqv complexity summaries.
 

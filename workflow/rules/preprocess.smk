@@ -325,7 +325,9 @@ rule cutsites:
     shell:
         r"""
         set -euo pipefail
-        gzip -dc {input} | awk 'BEGIN{{OFS="\t"}} {{l=$2+4; r=$3-5; if(l>=0) print $1,l,l+1,$4,"+"; if(r>=0) print $1,r,r+1,$4,"-"}}' | gzip -c > {output}
+        gzip -dc {input} | \
+            awk 'BEGIN{{OFS="\t"}} {{l=$2+4; r=$3-5; if(l>=0) print $1,l,l+1,$4,"+"; if(r>=0) print $1,r,r+1,$4,"-"}}' | \
+            LC_ALL=C sort -k1,1 -k2,2n | gzip -c > {output}
         """
 
 

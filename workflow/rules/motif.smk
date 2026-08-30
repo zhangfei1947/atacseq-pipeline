@@ -114,7 +114,11 @@ rule motif_enrichment:
             printf 'skipped: only %s foreground peaks\n' "$n" > {output}
             exit 0
         fi
-        ame --oc {params.outbase}/ame --control {input.background} {input.foreground} {input.motifs} >> {log} 2>&1
-        streme --oc {params.outbase}/streme --p {input.foreground} --n {input.background} >> {log} 2>&1
+        # The pinned MEME 5.5.9 BioContainer lacks the web-template data files
+        # required for HTML reports. Text mode contains the complete tabular /
+        # MEME-format results and avoids a late "Template does not contain data
+        # section" failure after the statistics have already been computed.
+        ame --text --control {input.background} {input.foreground} {input.motifs} > {params.outbase}/ame.tsv 2>> {log}
+        streme --text --p {input.foreground} --n {input.background} > {params.outbase}/streme.txt 2>> {log}
         printf 'complete: %s foreground peaks\n' "$n" > {output}
         """

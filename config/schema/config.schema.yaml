@@ -27,6 +27,7 @@ properties:
       redfly_bed: {type: string}
       effective_genome_size: {type: integer, minimum: 1}
       autosomes: {type: string}
+      autosomes_file: {type: string}
       mitochondrial_contigs:
         type: array
         items: {type: string}
