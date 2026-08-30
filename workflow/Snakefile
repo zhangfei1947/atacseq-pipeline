@@ -1,0 +1,102 @@
+import itertools
+import math
+from pathlib import Path
+
+import pandas as pd
+import yaml
+from snakemake.utils import validate
+
+
+configfile: "config/config.example.yaml"
+validate(config, "../config/schema/config.schema.yaml")
+
+OUT = config["output_dir"].rstrip("/")
+REF = config["reference"]
+PARAMS = config["parameters"]
+MODULES = config["modules"]
+
+with open(config["containers"]) as handle:
+    CONTAINERS = yaml.safe_load(handle)
+with open(config["analyses"]) as handle:
+    ANALYSES = yaml.safe_load(handle)["analyses"]
+
+UNITS_DF = pd.read_csv(config["samples"], sep="\t", dtype=str, keep_default_na=False)
+UNITS_DF = UNITS_DF.set_index("unit_id", drop=False)
+SAMPLES_DF = UNITS_DF.drop_duplicates("sample_id").set_index("sample_id", drop=False)
+UNITS = UNITS_DF.index.tolist()
+SAMPLES = SAMPLES_DF.index.tolist()
+GROUPS = sorted(SAMPLES_DF.replicate_group.unique())
+ANALYSIS_IDS = list(ANALYSES)
+CONTRASTS = [
+    (analysis_id, contrast_id)
+    for analysis_id, analysis in ANALYSES.items()
+    for contrast_id in analysis.get("contrasts", {})
+]
+
+
+def units_for_sample(sample_id):
+    return UNITS_DF.loc[UNITS_DF.sample_id == sample_id, "unit_id"].tolist()
+
+
+def samples_for_group(group):
+    return SAMPLES_DF.loc[SAMPLES_DF.replicate_group == group, "sample_id"].tolist()
+
+
+def samples_for_analysis(analysis_id):
+    return ANALYSES[analysis_id]["sample_ids"]
+
+
+def pair_token(a, b):
+    return "__vs__".join(sorted((a, b)))
+
+
+GROUP_PAIRS = {
+    group: [(a, b, pair_token(a, b)) for a, b in itertools.combinations(samples_for_group(group), 2)]
+    for group in GROUPS
+}
+
+
+FINAL_TARGETS = [
+    f"{OUT}/report/multiqc.html",
+    f"{OUT}/report/methods.md",
+    f"{OUT}/report/provenance.json",
+]
+FINAL_TARGETS += [f"{OUT}/bam/sample/{sample}.analysis.bam.bai" for sample in SAMPLES]
+FINAL_TARGETS += [f"{OUT}/tracks/{sample}.fragments.cpm.bw" for sample in SAMPLES]
+FINAL_TARGETS += [f"{OUT}/tracks/{sample}.cutsites.cpm.bw" for sample in SAMPLES]
+FINAL_TARGETS += [f"{OUT}/peaks/sample/{sample}.peaks.narrowPeak" for sample in SAMPLES]
+FINAL_TARGETS += [f"{OUT}/peaks/groups/{group}.majority.bed" for group in GROUPS]
+FINAL_TARGETS += [f"{OUT}/peaks/groups/{group}.strict.bed" for group in GROUPS]
+FINAL_TARGETS += [f"{OUT}/analyses/{analysis}.counts.tsv" for analysis in ANALYSIS_IDS]
+FINAL_TARGETS += [f"{OUT}/analyses/{analysis}.qc_decisions.tsv" for analysis in ANALYSIS_IDS]
+
+if MODULES.get("differential", True):
+    FINAL_TARGETS += [f"{OUT}/differential/{a}/{c}/results.tsv" for a, c in CONTRASTS]
+if MODULES.get("motif", True):
+    FINAL_TARGETS += [f"{OUT}/motifs/{a}/{c}/{direction}.done" for a, c in CONTRASTS for direction in ("opening", "closing")]
+if MODULES.get("peak_to_gene", True):
+    FINAL_TARGETS += [f"{OUT}/annotation/{analysis}.peak_to_gene.tsv" for analysis in ANALYSIS_IDS]
+    FINAL_TARGETS += [f"{OUT}/annotation/{analysis}.bulk_coaccessibility_status.json" for analysis in ANALYSIS_IDS]
+if MODULES.get("footprinting", False):
+    FINAL_TARGETS += [
+        f"{OUT}/footprints/{a}/{c}/done"
+        for a, c in CONTRASTS
+        if ANALYSES[a]["contrasts"][c].get("footprinting", False)
+    ]
+
+
+rule all:
+    default_target: True
+    input:
+        FINAL_TARGETS
+
+
+include: "rules/preprocess.smk"
+include: "rules/qc.smk"
+include: "rules/peaks.smk"
+include: "rules/idr.smk"
+include: "rules/differential.smk"
+include: "rules/motif.smk"
+include: "rules/annotation.smk"
+include: "rules/footprinting.smk"
+include: "rules/report.smk"

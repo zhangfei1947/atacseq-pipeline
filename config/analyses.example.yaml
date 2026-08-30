@@ -1,0 +1,11 @@
+analyses:
+  adult_treatment:
+    sample_ids: [control_r1, control_r2, treated_r1, treated_r2]
+    design: "~ condition"
+    contrasts:
+      treated_vs_control:
+        factor: condition
+        numerator: treated
+        denominator: control
+        footprinting: true
+        notes: "Primary published-study comparison"

@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this workflow, cite this repository and the tools listed in the generated methods/provenance report."
+title: "Drosophila bulk ATAC-seq Snakemake pipeline"
+type: software
+authors:
+  - family-names: Zhang
+    given-names: Fei
+license: MIT
+version: 0.1.0
+date-released: 2026-08-29
+

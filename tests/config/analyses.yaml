@@ -1,0 +1,11 @@
+analyses:
+  smoke:
+    sample_ids: [c1, c2, t1, t2]
+    design: "~ condition"
+    contrasts:
+      treated_vs_control:
+        factor: condition
+        numerator: treated
+        denominator: control
+        footprinting: true
+

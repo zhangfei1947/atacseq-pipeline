@@ -1,0 +1,54 @@
+# Linux/amd64 OCI manifests are digest-pinned. `version` is human-readable;
+# provenance also hashes the resulting SIF.
+fastqc:
+  version: 0.12.1
+  uri: docker://quay.io/biocontainers/fastqc@sha256:e194048df39c3145d9b4e0a14f4da20b59d59250465b6f2a9cb698445fd45900
+cutadapt:
+  version: 5.2
+  uri: docker://quay.io/biocontainers/cutadapt@sha256:741216fb9a56cdac2a61e93c64f857bc5b3e1f9f2c123cf7ae2c6ea5c97702d8
+bowtie2:
+  version: 2.5.5
+  uri: docker://quay.io/biocontainers/bowtie2@sha256:1a46d8fcf4d9befc14fcb59865f18a60da4914bfa0f7f7e481f6ca9b07e2fd19
+samtools:
+  version: 1.24
+  uri: docker://quay.io/biocontainers/samtools@sha256:a130447589651ed09252aa95a5e4f4132942cdb54d835d81a04a9a930d656561
+picard:
+  version: 3.5.0
+  uri: docker://quay.io/biocontainers/picard@sha256:84923e37c5a43b0984fdb152a89f8ac952878fafc3e6076c534e5e5c82e278be
+bedtools:
+  version: 2.31.1
+  uri: docker://quay.io/biocontainers/bedtools@sha256:ffcd7aa5cd028e8156b8412cc4c88e4f7c4bfa44c4da24ac2737f82116940559
+deeptools:
+  version: 3.5.6
+  uri: docker://quay.io/biocontainers/deeptools@sha256:db11ae232d88820ac1942e7f3fe2a6bc9eade7d199a5d45a9e23a13cccd134dc
+macs3:
+  version: 3.0.4
+  uri: docker://quay.io/biocontainers/macs3@sha256:15596c03f7a52c8aa27dc5feb181a6a5a12d2ad7cbcff4980021446c6a9451cb
+idr:
+  version: 2.0.4.2
+  uri: docker://quay.io/biocontainers/idr@sha256:d6fb2a7eb69bb236278562d08fcd0b62bfbe2e887d330111c6aea1e42cb26caa
+ataqv:
+  version: 1.3.1
+  uri: docker://quay.io/biocontainers/ataqv@sha256:5de05e8fde8c927f0851c67035b68fd62d0aa1fa5285db0541808c24f0b73fb7
+subread:
+  version: 2.1.1
+  uri: docker://quay.io/biocontainers/subread@sha256:a0f7ea960dd0f55240b330b5c4515388a493e266a7b427d6a59a39164bc14865
+meme:
+  version: 5.5.9
+  uri: docker://quay.io/biocontainers/meme@sha256:d7190afc62a2a1e2a050ab165274014b4d5a8ef559f8bbced405c57d2bf86353
+tobias:
+  version: 0.17.5
+  uri: docker://quay.io/biocontainers/tobias@sha256:2d8cf74526e064d1ea250d678def6a4cb60896fd07bc8024ea2c2a41e1f70720
+deseq2:
+  version: 1.50.2
+  uri: docker://quay.io/biocontainers/bioconductor-deseq2@sha256:de4543b77eba3d5b4b774a50bf2539b9adb0ba7451c9d909bf8def4a1b1dd56d
+chipseeker:
+  version: 1.46.1
+  uri: docker://quay.io/biocontainers/bioconductor-chipseeker@sha256:31fc71e4e2d5a59a324c4d8740edfc060fff2f7da3e9c8738d1d59e64d450ee2
+multiqc:
+  version: 1.35
+  uri: docker://quay.io/biocontainers/multiqc@sha256:b65e3fe879df27b92334dda0fd987a6e21bdee09a2848551d4f287099a93b7ac
+bedgraphtobigwig:
+  version: 482
+  uri: docker://quay.io/biocontainers/ucsc-bedgraphtobigwig@sha256:40ace9b457123ecd48fc58497b3bf1a1e7c39938f36752bcc8d4bf7a488ec31a
+

@@ -1,0 +1,63 @@
+project:
+  name: published_fly_atac
+  genome_build: FlyBase_r6.68
+
+samples: config/samples.tsv
+analyses: config/analyses.yaml
+output_dir: results
+
+reference:
+  fasta: resources/r6.68/genome.fa
+  bowtie2_index: resources/r6.68/bowtie2/genome
+  chrom_sizes: resources/r6.68/chrom.sizes
+  nuclear_contigs: resources/r6.68/nuclear_contigs.txt
+  blacklist_bed: resources/r6.68/blacklist.bed
+  gtf: resources/r6.68/genes.gtf
+  tss_bed: resources/r6.68/tss.bed
+  motif_database: resources/motifs/fly_motifs.meme
+  redfly_bed: ""
+  effective_genome_size: 130000000
+  autosomes: "2L,2R,3L,3R,4"
+  mitochondrial_contigs: [mitochondrion_genome]
+
+containers: containers/images.yaml
+
+parameters:
+  trimming:
+    adapter_mode: auto          # auto, explicit, or none; unit-level override allowed
+    adapter_r1: CTGTCTCTTATACACATCT
+    adapter_r2: CTGTCTCTTATACACATCT
+    minimum_length: 20
+  alignment:
+    max_insert: 2000
+    mapq: 30
+    allow_dovetail: false
+  peaks:
+    qvalue: 0.01
+    idr_peak_pvalue: 0.10
+    idr_threshold: 0.05
+    da_window: 500
+    motif_window: 200
+  differential:
+    fdr: 0.05
+    abs_log2fc: 1.0
+    min_count: 10
+  motif:
+    minimum_standard_peaks: 200
+    minimum_exploratory_peaks: 50
+    fimo_threshold: 0.0001
+  qc:
+    usable_fragments_good: 10000000
+    usable_fragments_warn: 5000000
+    frip_good: 0.20
+    frip_warn: 0.10
+    replicate_correlation_good: 0.80
+    replicate_correlation_warn: 0.60
+
+modules:
+  differential: true
+  motif: true
+  footprinting: true
+  peak_to_gene: true
+  redfly: false
+  bulk_coaccessibility: false

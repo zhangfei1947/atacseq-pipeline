@@ -1,0 +1,39 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+type: object
+required: [project, samples, analyses, output_dir, reference, containers, parameters, modules]
+properties:
+  project:
+    type: object
+    required: [name, genome_build]
+    properties:
+      name: {type: string, minLength: 1}
+      genome_build: {const: FlyBase_r6.68}
+  samples: {type: string, minLength: 1}
+  analyses: {type: string, minLength: 1}
+  output_dir: {type: string, minLength: 1}
+  containers: {type: string, minLength: 1}
+  reference:
+    type: object
+    required: [fasta, bowtie2_index, chrom_sizes, nuclear_contigs, blacklist_bed, gtf, tss_bed, motif_database, effective_genome_size]
+    properties:
+      fasta: {type: string}
+      bowtie2_index: {type: string}
+      chrom_sizes: {type: string}
+      nuclear_contigs: {type: string}
+      blacklist_bed: {type: string}
+      gtf: {type: string}
+      tss_bed: {type: string}
+      motif_database: {type: string}
+      redfly_bed: {type: string}
+      effective_genome_size: {type: integer, minimum: 1}
+      autosomes: {type: string}
+      mitochondrial_contigs:
+        type: array
+        items: {type: string}
+  parameters: {type: object}
+  modules:
+    type: object
+    required: [differential, motif, footprinting, peak_to_gene]
+    additionalProperties: {type: boolean}
+additionalProperties: false
+

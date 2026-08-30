@@ -1,0 +1,30 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+type: object
+required: [analyses]
+properties:
+  analyses:
+    type: object
+    minProperties: 1
+    additionalProperties:
+      type: object
+      required: [sample_ids, design, contrasts]
+      properties:
+        sample_ids:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items: {type: string}
+        design: {type: string, pattern: "^~"}
+        contrasts:
+          type: object
+          additionalProperties:
+            type: object
+            required: [factor, numerator, denominator]
+            properties:
+              factor: {type: string}
+              numerator: {type: string}
+              denominator: {type: string}
+              footprinting: {type: boolean}
+              notes: {type: string}
+additionalProperties: false
+

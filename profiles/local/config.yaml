@@ -1,0 +1,14 @@
+executor: local
+cores: 14
+jobs: 14
+latency-wait: 60
+rerun-incomplete: true
+keep-going: true
+printshellcmds: true
+show-failed-logs: true
+software-deployment-method: apptainer
+apptainer-prefix: containers/cache
+default-resources:
+  mem_mb: 2000
+  runtime: 60
+

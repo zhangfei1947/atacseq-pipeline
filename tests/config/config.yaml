@@ -1,0 +1,26 @@
+project: {name: smoke_test, genome_build: FlyBase_r6.68}
+samples: tests/config/samples.tsv
+analyses: tests/config/analyses.yaml
+output_dir: tests/results
+reference:
+  fasta: tests/data/reference/genome.fa
+  bowtie2_index: tests/data/reference/genome
+  chrom_sizes: tests/data/reference/chrom.sizes
+  nuclear_contigs: tests/data/reference/nuclear_contigs.txt
+  blacklist_bed: tests/data/reference/blacklist.bed
+  gtf: tests/data/reference/genes.gtf
+  tss_bed: tests/data/reference/tss.bed
+  motif_database: tests/data/reference/motifs.meme
+  redfly_bed: ""
+  effective_genome_size: 1000
+  autosomes: "2L"
+  mitochondrial_contigs: [mitochondrion_genome]
+containers: containers/images.yaml
+parameters:
+  trimming: {adapter_mode: auto, adapter_r1: CTGTCTCTTATACACATCT, adapter_r2: CTGTCTCTTATACACATCT, minimum_length: 20}
+  alignment: {max_insert: 2000, mapq: 30, allow_dovetail: false}
+  peaks: {qvalue: 0.01, idr_peak_pvalue: 0.10, idr_threshold: 0.05, da_window: 500, motif_window: 200}
+  differential: {fdr: 0.05, abs_log2fc: 1.0, min_count: 10}
+  motif: {minimum_standard_peaks: 200, minimum_exploratory_peaks: 50, fimo_threshold: 0.0001}
+  qc: {usable_fragments_good: 10000000, usable_fragments_warn: 5000000, frip_good: 0.20, frip_warn: 0.10, replicate_correlation_good: 0.80, replicate_correlation_warn: 0.60}
+modules: {differential: true, motif: true, footprinting: true, peak_to_gene: true, redfly: false, bulk_coaccessibility: false}

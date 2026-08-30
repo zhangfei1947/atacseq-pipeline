@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  static-and-dag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install control dependencies
+        run: |
+          pip install snakemake==9.25.1 snakemake-executor-plugin-cluster-generic==1.0.9 pandas==2.3.2 PyYAML==6.0.2 jsonschema==4.25.1 scipy==1.16.1
+      - name: Validate configuration and workflow DAG
+        run: |
+          bin/validate-config tests/config/config.yaml --check-files
+          snakemake --configfile tests/config/config.yaml --cores 1 --dry-run all --quiet rules
+          python -m py_compile bin/validate-config bin/pull-containers profiles/grace/slurm-submit.py profiles/grace/slurm-status.py workflow/scripts/*.py
+      - name: Snakemake lint
+        run: snakemake --configfile tests/config/config.yaml --lint
+

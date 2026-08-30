@@ -1,0 +1,24 @@
+executor: cluster-generic
+cluster-generic-submit-cmd: "python profiles/grace/slurm-submit.py"
+cluster-generic-status-cmd: "python profiles/grace/slurm-status.py"
+cluster-generic-cancel-cmd: scancel
+cluster-generic-cancel-nargs: 200
+jobs: 100
+local-cores: 2
+latency-wait: 120
+seconds-between-status-checks: 30
+max-jobs-per-second: 5
+max-status-checks-per-second: 5
+rerun-incomplete: true
+keep-going: true
+printshellcmds: true
+show-failed-logs: true
+software-deployment-method: apptainer
+apptainer-prefix: containers/cache
+apptainer-args: "--cleanenv"
+default-resources:
+  mem_mb: 2000
+  runtime: 60
+  slurm_account: ""
+  slurm_partition: ""
+

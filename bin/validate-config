@@ -1,0 +1,147 @@
+#!/usr/bin/env python3
+"""Validate schemas, identities, paths and core reference contracts."""
+
+import argparse
+import csv
+import re
+from pathlib import Path
+
+import jsonschema
+import pandas as pd
+import yaml
+
+
+REQUIRED_SAMPLE_COLUMNS = {
+    "project_id", "unit_id", "sample_id", "replicate_group",
+    "biological_replicate", "condition", "batch", "sex", "tissue", "stage",
+    "fastq_r1", "fastq_r2", "adapter_mode",
+}
+
+
+def load_yaml(path):
+    with Path(path).open() as handle:
+        return yaml.safe_load(handle)
+
+
+def validate_schema(instance, schema_path):
+    jsonschema.Draft202012Validator(load_yaml(schema_path)).validate(instance)
+
+
+def require_unique(frame, column):
+    duplicates = frame.loc[frame[column].duplicated(), column].tolist()
+    if duplicates:
+        raise ValueError(f"{column} must be unique; duplicates: {duplicates}")
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("config")
+parser.add_argument("--check-files", action="store_true")
+args = parser.parse_args()
+
+cfg = load_yaml(args.config)
+validate_schema(cfg, "config/schema/config.schema.yaml")
+analysis_doc = load_yaml(cfg["analyses"])
+validate_schema(analysis_doc, "config/schema/analyses.schema.yaml")
+samples = pd.read_csv(cfg["samples"], sep="\t", dtype=str, keep_default_na=False)
+missing = REQUIRED_SAMPLE_COLUMNS - set(samples.columns)
+if missing:
+    raise ValueError(f"sample table missing columns: {sorted(missing)}")
+require_unique(samples, "unit_id")
+safe_id = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
+for column in ("unit_id", "sample_id", "replicate_group"):
+    bad = [value for value in samples[column].unique() if not safe_id.fullmatch(value) or "__vs__" in value]
+    if bad:
+        raise ValueError(f"{column} contains unsafe identifiers: {bad}")
+if any(samples.fastq_r1 == samples.fastq_r2):
+    raise ValueError("fastq_r1 and fastq_r2 must differ for every paired-end unit")
+for column in ("fastq_r1", "fastq_r2"):
+    bad = [path for path in samples[column] if not path.endswith((".fastq.gz", ".fq.gz"))]
+    if bad:
+        raise ValueError(f"{column} must contain gzip-compressed FASTQ paths: {bad[:5]}")
+bad_modes = sorted(set(samples.adapter_mode) - {"", "auto", "explicit", "none"})
+if bad_modes:
+    raise ValueError(f"unknown adapter_mode values: {bad_modes}")
+
+for sample_id, group in samples.groupby("sample_id", sort=False):
+    for column in ("replicate_group", "biological_replicate", "condition", "batch", "sex", "tissue", "stage"):
+        if group[column].nunique() != 1:
+            raise ValueError(f"technical units for {sample_id} disagree on {column}")
+
+sample_meta = samples.drop_duplicates("sample_id")
+for group_id, group in sample_meta.groupby("replicate_group", sort=False):
+    if group.condition.nunique() != 1:
+        raise ValueError(f"replicate_group {group_id} spans multiple conditions")
+    if group.biological_replicate.duplicated().any():
+        raise ValueError(f"replicate_group {group_id} repeats a biological_replicate identifier")
+
+known = set(samples.sample_id)
+for analysis_id, analysis in analysis_doc["analyses"].items():
+    unknown = set(analysis["sample_ids"]) - known
+    if unknown:
+        raise ValueError(f"analysis {analysis_id} has unknown samples: {sorted(unknown)}")
+    meta = samples.drop_duplicates("sample_id").set_index("sample_id").loc[analysis["sample_ids"]]
+    for contrast_id, contrast in analysis.get("contrasts", {}).items():
+        factor = contrast["factor"]
+        if factor not in meta.columns:
+            raise ValueError(f"contrast {contrast_id}: factor {factor!r} is not sample metadata")
+        levels = set(meta[factor])
+        needed = {str(contrast["numerator"]), str(contrast["denominator"])}
+        if not needed <= levels:
+            raise ValueError(f"contrast {contrast_id}: missing factor levels {sorted(needed - levels)}")
+        counts = meta[factor].value_counts()
+        if any(counts.get(level, 0) < 2 for level in needed):
+            raise ValueError(f"contrast {contrast_id}: v1 DA requires >=2 biological samples per level")
+
+if args.check_files:
+    files = [cfg["samples"], cfg["analyses"], cfg["containers"]]
+    ref = cfg["reference"]
+    files.extend(ref[key] for key in ("fasta", "chrom_sizes", "nuclear_contigs", "blacklist_bed", "gtf", "tss_bed", "motif_database"))
+    files.extend(samples.fastq_r1)
+    files.extend(samples.fastq_r2)
+    absent = [str(path) for path in files if not Path(path).is_file()]
+    prefix = Path(ref["bowtie2_index"])
+    bt2 = list(prefix.parent.glob(prefix.name + ".*.bt2*"))
+    if len(bt2) < 6:
+        absent.append(str(prefix) + ".*.bt2{,l}")
+    if absent:
+        raise FileNotFoundError("missing required files:\n  " + "\n  ".join(absent))
+
+    chrom_sizes = []
+    with Path(ref["chrom_sizes"]).open() as handle:
+        for line in handle:
+            if not line.strip() or line.startswith("#"):
+                continue
+            fields = line.split()
+            if len(fields) < 2 or int(fields[1]) <= 0:
+                raise ValueError(f"invalid chrom.sizes line: {line.rstrip()}")
+            chrom_sizes.append((fields[0], int(fields[1])))
+    chrom_names = [chrom for chrom, _ in chrom_sizes]
+    if len(chrom_names) != len(set(chrom_names)):
+        raise ValueError("chrom.sizes has duplicate contigs")
+    chrom_set = set(chrom_names)
+    nuclear = {line.strip() for line in Path(ref["nuclear_contigs"]).read_text().splitlines() if line.strip()}
+    if not nuclear or not nuclear <= chrom_set:
+        raise ValueError("nuclear_contigs must be a nonempty subset of chrom.sizes")
+
+    fasta_contigs = {line[1:].split()[0] for line in Path(ref["fasta"]).read_text().splitlines() if line.startswith(">")}
+    if not chrom_set <= fasta_contigs:
+        raise ValueError(f"chrom.sizes contigs absent from FASTA: {sorted(chrom_set - fasta_contigs)}")
+
+    for label, bed_path in (("blacklist", ref["blacklist_bed"]), ("TSS", ref["tss_bed"])):
+        previous = None
+        order = {chrom: idx for idx, chrom in enumerate(chrom_names)}
+        with Path(bed_path).open() as handle:
+            for line in handle:
+                if not line.strip() or line.startswith(("#", "track", "browser")):
+                    continue
+                fields = line.split("\t")
+                if len(fields) < 3 or fields[0] not in chrom_set:
+                    raise ValueError(f"{label} BED has an invalid line/contig: {line.rstrip()}")
+                key = (order[fields[0]], int(fields[1]), int(fields[2]))
+                if key[1] < 0 or key[2] <= key[1]:
+                    raise ValueError(f"{label} BED has invalid coordinates: {line.rstrip()}")
+                if previous is not None and key < previous:
+                    raise ValueError(f"{label} BED is not sorted by chrom.sizes order and start")
+                previous = key
+
+print(f"Configuration valid: {len(samples)} units, {samples.sample_id.nunique()} samples, {len(analysis_doc['analyses'])} analyses")

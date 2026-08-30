@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+"""Pull digest-pinned OCI images into a shared SIF cache and hash them."""
+
+import argparse
+import hashlib
+import os
+import subprocess
+from pathlib import Path
+
+import yaml
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("cache", nargs="?", default=os.path.join(os.environ.get("SCRATCH", "containers"), "atacseq-container-cache") if os.environ.get("SCRATCH") else "containers/cache")
+parser.add_argument("--manifest", default="containers/images.yaml")
+args = parser.parse_args()
+
+cache = Path(args.cache).resolve()
+cache.mkdir(parents=True, exist_ok=True)
+singularity_cache = Path(os.environ.get("SINGULARITY_CACHEDIR", cache / ".singularity"))
+singularity_cache.mkdir(parents=True, exist_ok=True)
+pull_env = os.environ.copy()
+pull_env["SINGULARITY_CACHEDIR"] = str(singularity_cache)
+images = yaml.safe_load(Path(args.manifest).read_text())
+rows = ["name\tversion\turi\tsif\tsha256"]
+for name, spec in images.items():
+    # This is Snakemake's own cache-name algorithm, allowing true prefetch.
+    cache_name = hashlib.md5(spec["uri"].encode(), usedforsecurity=False).hexdigest() + ".simg"
+    sif = cache / cache_name
+    if not sif.exists():
+        subprocess.run(["singularity", "pull", "--name", str(sif), spec["uri"]], check=True, env=pull_env)
+    digest = hashlib.sha256(sif.read_bytes()).hexdigest()
+    rows.append(f"{name}\t{spec['version']}\t{spec['uri']}\t{sif}\t{digest}")
+Path("containers/locked.tsv").write_text("\n".join(rows) + "\n")
+print(f"Locked {len(images)} images in {cache}")
