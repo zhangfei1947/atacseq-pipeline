@@ -70,4 +70,3 @@ status = {
     "interpretation": "no_biological_idr" if n == 1 else ("direct_pair" if n == 2 else "all_pairwise"),
 }
 Path(snakemake.output.status).write_text(json.dumps(status, indent=2) + "\n")
-

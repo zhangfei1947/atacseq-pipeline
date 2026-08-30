@@ -22,4 +22,3 @@ jobs:
           python -m py_compile bin/validate-config bin/pull-containers profiles/grace/slurm-submit.py profiles/grace/slurm-status.py workflow/scripts/*.py
       - name: Snakemake lint
         run: snakemake --configfile tests/config/config.yaml --lint
-

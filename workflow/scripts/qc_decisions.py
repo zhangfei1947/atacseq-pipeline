@@ -126,4 +126,3 @@ for idx, sample in enumerate(sample_ids):
 
 Path(snakemake.output[0]).parent.mkdir(parents=True, exist_ok=True)
 pd.DataFrame(rows).to_csv(snakemake.output[0], sep="\t", index=False, na_rep="NA")
-

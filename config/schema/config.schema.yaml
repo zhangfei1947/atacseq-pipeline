@@ -36,4 +36,3 @@ properties:
     required: [differential, motif, footprinting, peak_to_gene]
     additionalProperties: {type: boolean}
 additionalProperties: false
-

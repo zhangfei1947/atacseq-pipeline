@@ -49,4 +49,3 @@ command.append(str(jobscript))
 
 result = subprocess.run(command, check=True, text=True, capture_output=True)
 print(result.stdout.strip().split(";")[0])
-

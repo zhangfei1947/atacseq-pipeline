@@ -30,4 +30,3 @@ if (isTRUE(snakemake@params[["has_redfly"]])) {
   write.table(data.frame(peak_id=character(), redfly_name=character()), snakemake@output[["redfly"]], sep="\t", quote=FALSE, row.names=FALSE)
 }
 sink()
-

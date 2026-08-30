@@ -3,4 +3,3 @@ TEST	u_c1	c1	control	1	control	b1	mixed	whole_body	adult	tests/data/fastq/c1_R1.
 TEST	u_c2	c2	control	2	control	b1	mixed	whole_body	adult	tests/data/fastq/c2_R1.fastq.gz	tests/data/fastq/c2_R2.fastq.gz	auto
 TEST	u_t1	t1	treated	1	treated	b1	mixed	whole_body	adult	tests/data/fastq/t1_R1.fastq.gz	tests/data/fastq/t1_R2.fastq.gz	auto
 TEST	u_t2	t2	treated	2	treated	b1	mixed	whole_body	adult	tests/data/fastq/t2_R1.fastq.gz	tests/data/fastq/t2_R2.fastq.gz	auto
-

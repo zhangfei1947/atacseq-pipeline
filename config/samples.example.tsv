@@ -3,4 +3,3 @@ PRJNA000001	SRR000001	control_r1	control	1	control	paper1	mixed	whole_body	adult
 PRJNA000001	SRR000002	control_r2	control	2	control	paper1	mixed	whole_body	adult	data/SRR000002_1.fastq.gz	data/SRR000002_2.fastq.gz	auto
 PRJNA000001	SRR000003	treated_r1	treated	1	treated	paper1	mixed	whole_body	adult	data/SRR000003_1.fastq.gz	data/SRR000003_2.fastq.gz	auto
 PRJNA000001	SRR000004	treated_r2	treated	2	treated	paper1	mixed	whole_body	adult	data/SRR000004_1.fastq.gz	data/SRR000004_2.fastq.gz	auto
-

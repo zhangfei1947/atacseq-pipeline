@@ -85,4 +85,3 @@ rule tobias_footprinting:
             --prefix bindetect --cores {threads} >> {log} 2>&1
         printf 'complete: computational footprint inference\n' > {output}
         """
-

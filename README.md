@@ -49,4 +49,3 @@ The controller runs on a compute node. It submits rule jobs through
 
 See [`docs/design.md`](docs/design.md), [`docs/grace.md`](docs/grace.md), and
 [`docs/outputs.md`](docs/outputs.md) for the frozen v1 decisions.
-

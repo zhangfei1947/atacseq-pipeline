@@ -65,4 +65,3 @@ with open(snakemake.output.bed, "w") as bed, open(snakemake.output.motif, "w") a
         mstart = max(0, mend - motif_width)
         motif.write(f"{chrom}\t{mstart}\t{mend}\t{peak_id}\t{score:g}\t.\n")
         saf.write(f"{peak_id}\t{chrom}\t{start + 1}\t{end}\t.\n")
-

@@ -21,4 +21,3 @@ default-resources:
   runtime: 60
   slurm_account: ""
   slurm_partition: ""
-

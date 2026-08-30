@@ -13,4 +13,3 @@ counts = counts[["Geneid", "Chr", "Start", "End", "Length"] + sample_columns]
 counts.columns = ["peak_id", "chrom", "start_1based", "end", "length"] + sample_ids
 Path(snakemake.output[0]).parent.mkdir(parents=True, exist_ok=True)
 counts.to_csv(snakemake.output[0], sep="\t", index=False)
-

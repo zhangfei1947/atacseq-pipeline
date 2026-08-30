@@ -114,4 +114,3 @@ rule differential_accessibility:
         CONTAINERS["deseq2"]["uri"]
     script:
         "../scripts/deseq2_atac.R"
-

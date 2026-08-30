@@ -51,4 +51,3 @@ multiqc:
 bedgraphtobigwig:
   version: 482
   uri: docker://quay.io/biocontainers/ucsc-bedgraphtobigwig@sha256:40ace9b457123ecd48fc58497b3bf1a1e7c39938f36752bcc8d4bf7a488ec31a
-

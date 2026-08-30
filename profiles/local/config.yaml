@@ -11,4 +11,3 @@ apptainer-prefix: containers/cache
 default-resources:
   mem_mb: 2000
   runtime: 60
-

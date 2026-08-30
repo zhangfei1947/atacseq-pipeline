@@ -24,4 +24,3 @@ Optional:
 `bin/validate-config` checks existence, FASTA/index completeness, contig
 compatibility, sort order and basic formats before analysis. Reference creation
 itself is deliberately outside v1 so that curated files can be supplied later.
-

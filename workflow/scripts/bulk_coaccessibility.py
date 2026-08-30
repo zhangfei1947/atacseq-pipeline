@@ -60,4 +60,3 @@ else:
     links.to_csv(snakemake.output.links, sep="\t", index=False)
     status.update({"status": "exploratory_complete", "reported_links": len(links), "warning": "ATAC-only correlation is not a validated enhancer-gene interaction."})
     Path(snakemake.output.status).write_text(json.dumps(status, indent=2) + "\n")
-

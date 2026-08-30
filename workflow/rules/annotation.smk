@@ -41,4 +41,3 @@ rule bulk_coaccessibility:
         runtime=360
     script:
         "../scripts/bulk_coaccessibility.py"
-

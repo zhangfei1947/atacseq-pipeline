@@ -20,4 +20,3 @@ All paths are rooted at `output_dir`.
 Intermediate technical-unit trimmed FASTQs are reproducible working products,
 not stable integration interfaces. BAMs and stable tables are never removed by
 the workflow.
-

@@ -11,4 +11,3 @@ selected.insert(1, "genome_build", snakemake.params.genome)
 selected.insert(2, "analysis_include", "yes")
 Path(snakemake.output[0]).parent.mkdir(parents=True, exist_ok=True)
 selected.to_csv(snakemake.output[0], sep="\t", index=False)
-

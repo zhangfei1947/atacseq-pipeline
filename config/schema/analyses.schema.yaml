@@ -27,4 +27,3 @@ properties:
               footprinting: {type: boolean}
               notes: {type: string}
 additionalProperties: false
-

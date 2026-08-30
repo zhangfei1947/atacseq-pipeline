@@ -73,4 +73,3 @@ Path(snakemake.output.status).write_text(json.dumps({
     "status": status,
     "background_method": "GC-decile matched within tested peak universe",
 }, indent=2) + "\n")
-

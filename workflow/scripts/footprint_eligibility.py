@@ -41,4 +41,3 @@ status = {
     "interpretation": "computational footprint inference; not direct TF binding evidence",
 }
 Path(snakemake.output.status).write_text(json.dumps(status, indent=2) + "\n")
-
